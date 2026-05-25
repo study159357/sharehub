@@ -145,7 +145,7 @@
 
   <!-- 上传弹窗 -->
   <div id="uploadModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-gray-900 border border-white/20 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden">
+    <div class="bg-gray-900 border border-white/20 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
       <div class="flex items-center justify-between p-5 border-b border-white/10">
         <h2 class="text-lg font-semibold text-white">上传文件</h2>
         <button id="closeUpload" class="w-8 h-8 bg-white/10 rounded-lg hover:bg-white/20 flex items-center justify-center text-gray-300">
@@ -153,15 +153,60 @@
         </button>
       </div>
       <div class="p-5 overflow-y-auto">
-        <div id="uploadZone" class="border-2 border-dashed border-white/20 rounded-xl p-12 text-center cursor-pointer hover:border-purple-500 transition">
-          <div class="w-16 h-16 bg-purple-500/20 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <i class="fa-solid fa-cloud-arrow-up text-3xl text-purple-400"></i>
+        <!-- 选择文件区域 -->
+        <div id="uploadZone" class="border-2 border-dashed border-white/20 rounded-xl p-8 text-center cursor-pointer hover:border-purple-500 transition mb-4">
+          <div class="w-14 h-14 bg-purple-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+            <i class="fa-solid fa-plus text-2xl text-purple-400"></i>
           </div>
-          <h3 class="font-medium text-white mb-2">拖拽或点击上传</h3>
-          <p class="text-sm text-gray-400">支持所有文件类型</p>
+          <h3 class="font-medium text-white mb-1">点击选择文件</h3>
+          <p class="text-sm text-gray-400">或拖拽文件到此处</p>
         </div>
-        <input type="file" id="fileInput" multiple hidden>
-        <div id="uploadQueue" class="mt-4 space-y-3"></div>
+        <input type="file" id="fileInput" hidden>
+        
+        <!-- 文件信息填写区域 -->
+        <div id="fileInfoArea" class="hidden space-y-4">
+          <!-- 已选文件预览 -->
+          <div class="bg-white/5 rounded-xl p-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                <i id="selectedFileIcon" class="fa-solid fa-file text-purple-400 text-xl"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm text-white truncate" id="selectedFileName">filename.txt</div>
+                <div class="text-xs text-gray-400" id="selectedFileSize">0 KB</div>
+              </div>
+              <button id="clearFile" class="w-8 h-8 bg-white/10 rounded-lg hover:bg-white/20 flex items-center justify-center text-gray-400">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- 文件名 -->
+          <div>
+            <label class="block text-sm text-gray-300 mb-2">
+              <i class="fa-solid fa-pen mr-2"></i>文件名
+            </label>
+            <input type="text" id="customFileName" placeholder="可修改文件名"
+              class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 placeholder-gray-400 focus:outline-none focus:border-purple-500 transition">
+          </div>
+          
+          <!-- 上传者 -->
+          <div>
+            <label class="block text-sm text-gray-300 mb-2">
+              <i class="fa-solid fa-user mr-2"></i>上传者
+            </label>
+            <input type="text" id="uploaderName" placeholder="请输入您的名字"
+              class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 placeholder-gray-400 focus:outline-none focus:border-purple-500 transition">
+          </div>
+          
+          <!-- 确认上传按钮 -->
+          <button id="confirmUpload" class="w-full gradient-bg py-3 rounded-xl font-medium text-white hover:opacity-90 transition">
+            <i class="fa-solid fa-cloud-arrow-up mr-2"></i>确认上传
+          </button>
+        </div>
+        
+        <!-- 上传队列 -->
+        <div id="uploadQueue" class="mt-4 space-y-3 hidden"></div>
       </div>
     </div>
   </div>
@@ -169,7 +214,12 @@
   <!-- 预览弹窗 -->
   <div id="previewModal" class="fixed inset-0 bg-black/95 z-50 hidden flex flex-col">
     <div class="flex items-center justify-between p-4 bg-black/50">
-      <h3 id="previewName" class="text-white text-sm truncate max-w-md"></h3>
+      <div class="flex items-center gap-3">
+        <h3 id="previewName" class="text-white text-sm truncate max-w-xs"></h3>
+        <span id="previewUploader" class="text-xs text-gray-400 hidden">
+          <i class="fa-solid fa-user mr-1"></i><span></span>
+        </span>
+      </div>
       <div class="flex items-center gap-2">
         <button id="downloadPreview" class="px-3 py-1.5 bg-purple-600 rounded-lg text-sm hover:bg-purple-700 transition text-white">
           <i class="fa-solid fa-download mr-1"></i>下载
@@ -209,7 +259,6 @@
   <!-- 管理员面板弹窗 -->
   <div id="adminPanelModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-gray-900 border border-white/20 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-      <!-- 头部 -->
       <div class="flex items-center justify-between p-5 border-b border-white/10">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center">
@@ -230,7 +279,6 @@
         </div>
       </div>
       
-      <!-- 标签页 -->
       <div class="flex border-b border-white/10">
         <button class="admin-tab active px-6 py-3 text-sm font-medium text-white border-b-2 border-purple-500" data-tab="files">
           <i class="fa-solid fa-file-lines mr-2"></i>文件管理
@@ -240,9 +288,7 @@
         </button>
       </div>
       
-      <!-- 内容区 -->
       <div class="flex-1 overflow-y-auto p-5">
-        <!-- 文件管理 -->
         <div id="adminFilesTab" class="admin-content">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-white font-medium">所有文件</h3>
@@ -251,7 +297,6 @@
           <div id="adminFileList" class="space-y-2 max-h-96 overflow-y-auto"></div>
         </div>
         
-        <!-- 数据库配置 -->
         <div id="adminConfigTab" class="admin-content hidden">
           <div class="space-y-4">
             <div class="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl mb-4">
@@ -312,11 +357,13 @@
     let CONFIG = { ...DEFAULT_CONFIG };
     let sb, bucket, isAdmin = false;
     let files = [], viewMode = 'grid', category = 'all', search = '', sort = 'newest', currentFile;
+    
+    // 上传相关
+    let selectedFile = null;
 
     const $ = id => document.getElementById(id);
     const $$ = sel => document.querySelectorAll(sel);
 
-    // 加载配置
     function loadConfig() {
       try {
         const stored = localStorage.getItem(CONFIG_KEY);
@@ -326,7 +373,6 @@
       }
     }
 
-    // 保存配置
     function saveConfig(newConfig) {
       CONFIG = { ...CONFIG, ...newConfig };
       localStorage.setItem(CONFIG_KEY, JSON.stringify(CONFIG));
@@ -334,7 +380,6 @@
       bucket = CONFIG.bucket;
     }
 
-    // 初始化
     function init() {
       loadConfig();
       sb = supabase.createClient(CONFIG.url, CONFIG.key);
@@ -344,7 +389,6 @@
       loadFiles();
     }
 
-    // 格式化
     function formatSize(b) { 
       if (!b) return '0 B'; 
       const k = 1024, s = ['B','KB','MB','GB']; 
@@ -376,7 +420,6 @@
       return 'fa-file'; 
     }
 
-    // 提示
     function toast(msg, type = 'info') {
       const c = { success: 'fa-check-circle text-green-400', error: 'fa-circle-xmark text-red-400', info: 'fa-circle-info text-purple-400' };
       const t = document.createElement('div');
@@ -386,7 +429,6 @@
       setTimeout(() => t.remove(), 4000);
     }
 
-    // 加载文件
     async function loadFiles() {
       $('loadingState').classList.remove('hidden');
       $('emptyState').classList.add('hidden');
@@ -403,7 +445,6 @@
       renderAdminFileList();
     }
 
-    // 统计
     function updateStats() {
       const s = files.reduce((a, f) => a + (f.size || 0), 0);
       const d = files.reduce((a, f) => a + (f.download_count || 0), 0);
@@ -414,7 +455,6 @@
       $('statViews').textContent = v;
     }
 
-    // 渲染
     function renderFiles() {
       let list = [...files];
       if (category !== 'all') list = list.filter(f => (f.category || getCat(f.type)) === category);
@@ -442,6 +482,7 @@
     function renderCard(f) {
       const c = f.category || getCat(f.type);
       const previewable = ['image', 'video', 'audio', 'document'].includes(c);
+      const uploaderInfo = f.uploader ? `<div class="text-xs text-gray-500"><i class="fa-solid fa-user mr-1"></i>${f.uploader}</div>` : '';
       const deleteBtn = isAdmin ? `<button class="del-btn absolute top-2 right-2 px-2 py-1 bg-red-500/50 rounded text-xs text-white hover:bg-red-600 transition opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash"></i></button>` : '';
       
       return `<div class="glass rounded-xl overflow-hidden hover:border-purple-500/50 transition group" data-id="${f.id}">
@@ -453,11 +494,11 @@
           ${deleteBtn}
         </div>
         <div class="p-4">
-          <div class="text-sm text-white truncate mb-2" title="${f.name}">${f.name}</div>
-          <div class="flex items-center gap-3 text-xs text-gray-400 mb-3">
+          <div class="text-sm text-white truncate mb-1" title="${f.name}">${f.name}</div>
+          ${uploaderInfo}
+          <div class="flex items-center gap-3 text-xs text-gray-400 mb-3 mt-1">
             <span>${formatSize(f.size)}</span>
             <span><i class="fa-solid fa-download text-blue-400"></i> ${f.download_count || 0}</span>
-            <span><i class="fa-solid fa-eye text-orange-400"></i> ${f.preview_count || 0}</span>
           </div>
           <div class="flex gap-2">
             <button class="dl-btn flex-1 py-2 bg-white/10 rounded-lg text-sm text-white hover:bg-white/20 transition"><i class="fa-solid fa-download mr-1"></i>下载</button>
@@ -470,6 +511,7 @@
     function renderRow(f) {
       const c = f.category || getCat(f.type);
       const previewable = ['image', 'video', 'audio', 'document'].includes(c);
+      const uploaderInfo = f.uploader ? `<span class="text-gray-500"><i class="fa-solid fa-user mr-1"></i>${f.uploader}</span>` : '';
       const deleteBtn = isAdmin ? `<button class="del-btn px-3 py-2 bg-red-500/30 rounded-lg hover:bg-red-500/50"><i class="fa-solid fa-trash text-red-400 text-sm"></i></button>` : '';
       
       return `<div class="glass rounded-lg p-3 flex items-center gap-4" data-id="${f.id}">
@@ -481,6 +523,7 @@
         <div class="flex-1 min-w-0">
           <div class="text-sm text-white truncate">${f.name}</div>
           <div class="text-xs text-gray-400 mt-1">${getCatLabel(c)} · ${formatSize(f.size)} · ${formatDate(f.created_at)}</div>
+          ${uploaderInfo ? `<div class="text-xs text-gray-500 mt-0.5">${uploaderInfo}</div>` : ''}
         </div>
         <div class="flex gap-2">
           <button class="dl-btn px-3 py-2 bg-white/10 rounded-lg hover:bg-white/20"><i class="fa-solid fa-download text-sm text-white"></i></button>
@@ -490,7 +533,6 @@
       </div>`;
     }
 
-    // 管理员文件列表
     function renderAdminFileList() {
       $('adminFileCount').textContent = `${files.length} 个文件`;
       $('adminFileList').innerHTML = files.map(f => `
@@ -498,7 +540,7 @@
           <i class="fa-solid ${getIcon(f.type)} text-gray-400"></i>
           <div class="flex-1 min-w-0">
             <div class="text-sm text-white truncate">${f.name}</div>
-            <div class="text-xs text-gray-400">${formatSize(f.size)} · ${formatDate(f.created_at)}</div>
+            <div class="text-xs text-gray-400">${formatSize(f.size)} · ${formatDate(f.created_at)} ${f.uploader ? '· ' + f.uploader : ''}</div>
           </div>
           <button class="admin-del-btn px-3 py-1.5 bg-red-500/30 rounded text-xs text-red-400 hover:bg-red-500/50 transition">
             <i class="fa-solid fa-trash"></i>
@@ -515,7 +557,6 @@
       });
     }
 
-    // 下载
     async function download(f) {
       const { data, error } = await sb.storage.from(bucket).download(f.storage_path);
       if (error) { toast('下载失败', 'error'); return; }
@@ -528,12 +569,19 @@
       updateStats(); renderFiles();
     }
 
-    // 预览
     async function preview(f) {
       currentFile = f;
       $('previewModal').classList.remove('hidden');
       $('previewName').textContent = f.name;
       $('deletePreview').classList.toggle('hidden', !isAdmin);
+      
+      // 显示上传者
+      if (f.uploader) {
+        $('previewUploader').classList.remove('hidden');
+        $('previewUploader').querySelector('span').textContent = f.uploader;
+      } else {
+        $('previewUploader').classList.add('hidden');
+      }
       
       const url = sb.storage.from(bucket).getPublicUrl(f.storage_path).data.publicUrl;
       await sb.from('files').update({ preview_count: (f.preview_count || 0) + 1 }).eq('id', f.id);
@@ -550,49 +598,133 @@
       else content.innerHTML = `<div class="text-center"><i class="fa-solid ${getIcon(f.type)} text-6xl text-gray-400 mb-4"></i><p class="text-gray-400 mb-4">不支持预览</p><a href="${url}" download="${f.name}" class="px-6 py-3 bg-purple-600 rounded-lg text-white hover:bg-purple-700 transition"><i class="fa-solid fa-download mr-2"></i>下载查看</a></div>`;
     }
 
-    // 删除
     async function deleteFile(f) {
-      if (!confirm(`确定删除 "${f.name}" 吗？`)) return;
-      const { error: sErr } = await sb.storage.from(bucket).remove([f.storage_path]);
-      if (sErr) { toast('删除文件失败', 'error'); return; }
+      if (!confirm(`确定删除 "${f.name}" 吗？\n\n此操作不可恢复！`)) return;
+      
+      // 先删除数据库记录
       const { error: dErr } = await sb.from('files').delete().eq('id', f.id);
-      if (dErr) { toast('删除记录失败', 'error'); return; }
-      toast('已删除', 'success');
+      if (dErr) { 
+        toast('删除记录失败: ' + dErr.message, 'error'); 
+        return; 
+      }
+      
+      // 再删除存储文件
+      const { error: sErr } = await sb.storage.from(bucket).remove([f.storage_path]);
+      if (sErr) { 
+        // 数据库已删除，存储文件删除失败，给个警告
+        toast('记录已删除，但存储文件删除失败', 'info'); 
+      } else {
+        toast('已删除', 'success');
+      }
+      
       files = files.filter(x => x.id !== f.id);
-      updateStats(); renderFiles(); renderAdminFileList();
+      updateStats(); 
+      renderFiles(); 
+      renderAdminFileList();
       $('previewModal').classList.add('hidden');
     }
 
-    // 上传
-    async function upload(file) {
-      if (file.size > MAX_FILE_SIZE) { toast(`${file.name} 超过100MB`, 'error'); return; }
+    // 选择文件
+    function selectFile(file) {
+      selectedFile = file;
+      $('selectedFileName').textContent = file.name;
+      $('selectedFileSize').textContent = formatSize(file.size);
+      $('selectedFileIcon').className = `fa-solid ${getIcon(file.type)} text-purple-400 text-xl`;
+      $('customFileName').value = file.name;
+      $('uploaderName').value = '';
+      $('uploadZone').classList.add('hidden');
+      $('fileInfoArea').classList.remove('hidden');
+    }
+
+    // 清除选择
+    function clearFileSelection() {
+      selectedFile = null;
+      $('fileInput').value = '';
+      $('uploadZone').classList.remove('hidden');
+      $('fileInfoArea').classList.add('hidden');
+    }
+
+    // 上传文件
+    async function uploadFile() {
+      if (!selectedFile) {
+        toast('请先选择文件', 'error');
+        return;
+      }
+      
+      const uploader = $('uploaderName').value.trim();
+      if (!uploader) {
+        toast('请输入上传者名称', 'error');
+        $('uploaderName').focus();
+        return;
+      }
+      
+      let fileName = $('customFileName').value.trim() || selectedFile.name;
+      if (selectedFile.size > MAX_FILE_SIZE) { toast(`${fileName} 超过100MB`, 'error'); return; }
+      
       const id = `up-${Date.now()}`;
       const item = document.createElement('div');
       item.id = id;
       item.className = 'bg-black/30 rounded-lg p-3 flex items-center gap-3';
-      item.innerHTML = `<div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center"><i class="fa-solid ${getIcon(file.type)} text-gray-400"></i></div><div class="flex-1"><div class="text-sm text-white truncate">${file.name}</div><div class="text-xs text-gray-400">${formatSize(file.size)}</div><div class="h-1 bg-white/10 rounded mt-2"><div class="h-full bg-purple-500 rounded transition-all" style="width:0%"></div></div></div><div class="status text-sm font-medium text-gray-400">等待</div>`;
+      item.innerHTML = `<div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center"><i class="fa-solid ${getIcon(selectedFile.type)} text-gray-400"></i></div><div class="flex-1"><div class="text-sm text-white truncate">${fileName}</div><div class="text-xs text-gray-400">${formatSize(selectedFile.size)}</div><div class="h-1 bg-white/10 rounded mt-2"><div class="h-full bg-purple-500 rounded transition-all" style="width:0%"></div></div></div><div class="status text-sm font-medium text-gray-400">等待</div>`;
       $('uploadQueue').appendChild(item);
+      $('uploadQueue').classList.remove('hidden');
+      $('fileInfoArea').classList.add('hidden');
+      
       const setS = (s, c) => { const el = item.querySelector('.status'); el.textContent = s; el.className = `status text-sm font-medium ${c}`; };
+      
       setS('上传中', 'text-purple-400');
-      const ext = file.name.split('.').pop(), path = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      
+      const ext = fileName.split('.').pop();
+      const path = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      
       const xhr = new XMLHttpRequest();
       xhr.upload.addEventListener('progress', e => { if (e.lengthComputable) item.querySelector('.bg-purple-500').style.width = `${Math.round(e.loaded / e.total * 100)}%`; });
+      
       xhr.addEventListener('load', async () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           setS('保存', 'text-purple-400');
-          const { data: nf, error } = await sb.from('files').insert({ name: file.name, type: file.type, size: file.size, storage_path: path, download_count: 0, preview_count: 0, category: getCat(file.type) }).select().single();
-          if (error) { setS('失败', 'text-red-400'); toast('保存失败', 'error'); }
-          else { setS('完成', 'text-green-400'); files.unshift(nf); updateStats(); renderFiles(); renderAdminFileList(); toast(`${file.name} 上传成功`, 'success'); setTimeout(() => item.remove(), 2000); }
-        } else { setS('失败', 'text-red-400'); toast('上传失败', 'error'); }
+          const { data: newFile, error } = await sb.from('files').insert({ 
+            name: fileName, 
+            type: selectedFile.type, 
+            size: selectedFile.size, 
+            storage_path: path, 
+            download_count: 0, 
+            preview_count: 0, 
+            category: getCat(selectedFile.type),
+            uploader: uploader
+          }).select().single();
+          
+          if (error) {
+            setS('失败', 'text-red-400');
+            toast('保存失败', 'error');
+          } else {
+            setS('完成', 'text-green-400');
+            files.unshift(newFile);
+            updateStats();
+            renderFiles();
+            renderAdminFileList();
+            toast(`${fileName} 上传成功`, 'success');
+            setTimeout(() => {
+              item.remove();
+              if ($('uploadQueue').children.length === 0) {
+                $('uploadQueue').classList.add('hidden');
+                clearFileSelection();
+              }
+            }, 2000);
+          }
+        } else {
+          setS('失败', 'text-red-400');
+          toast('上传失败', 'error');
+        }
       });
+      
       xhr.addEventListener('error', () => { setS('失败', 'text-red-400'); toast('网络错误', 'error'); });
       xhr.open('POST', `${sb.supabaseUrl}/storage/v1/object/${bucket}/${path}`);
       xhr.setRequestHeader('apikey', sb.supabaseKey);
       xhr.setRequestHeader('Authorization', `Bearer ${sb.supabaseKey}`);
-      xhr.send(file);
+      xhr.send(selectedFile);
     }
 
-    // 事件绑定
     function bindEvents() {
       $$('.tab-btn').forEach(b => b.addEventListener('click', () => {
         $$('.tab-btn').forEach(t => { t.classList.remove('bg-purple-600', 'text-white'); t.classList.add('text-gray-300'); });
@@ -623,25 +755,48 @@
         renderFiles();
       });
       
-      $('uploadBtn').addEventListener('click', () => { $('uploadModal').classList.remove('hidden'); });
-      $('closeUpload').addEventListener('click', () => { $('uploadModal').classList.add('hidden'); $('uploadQueue').innerHTML = ''; });
+      // 上传弹窗
+      $('uploadBtn').addEventListener('click', () => { 
+        $('uploadModal').classList.remove('hidden'); 
+        clearFileSelection();
+        $('uploadQueue').classList.add('hidden');
+        $('uploadQueue').innerHTML = '';
+      });
+      $('closeUpload').addEventListener('click', () => { 
+        $('uploadModal').classList.add('hidden'); 
+      });
       $('uploadZone').addEventListener('click', () => $('fileInput').click());
       $('uploadZone').addEventListener('dragover', e => { e.preventDefault(); $('uploadZone').classList.add('border-purple-500'); });
       $('uploadZone').addEventListener('dragleave', () => $('uploadZone').classList.remove('border-purple-500'));
-      $('uploadZone').addEventListener('drop', e => { e.preventDefault(); $('uploadZone').classList.remove('border-purple-500'); Array.from(e.dataTransfer.files).forEach(upload); });
-      $('fileInput').addEventListener('change', e => { Array.from(e.target.files).forEach(upload); e.target.value = ''; });
+      $('uploadZone').addEventListener('drop', e => {
+        e.preventDefault();
+        $('uploadZone').classList.remove('border-purple-500');
+        if (e.dataTransfer.files.length > 0) {
+          selectFile(e.dataTransfer.files[0]);
+        }
+      });
+      $('fileInput').addEventListener('change', e => {
+        if (e.target.files.length > 0) {
+          selectFile(e.target.files[0]);
+        }
+      });
       
+      // 清除选择
+      $('clearFile').addEventListener('click', clearFileSelection);
+      
+      // 确认上传
+      $('confirmUpload').addEventListener('click', uploadFile);
+      
+      // 预览
       $('closePreview').addEventListener('click', () => { $('previewModal').classList.add('hidden'); $('previewContent').innerHTML = ''; });
       $('downloadPreview').addEventListener('click', () => { if (currentFile) download(currentFile); });
       $('deletePreview').addEventListener('click', () => { if (currentFile) deleteFile(currentFile); });
       
-      // 管理员按钮
+      // 管理员
       $('adminBtn').addEventListener('click', () => {
         if (isAdmin) {
-          // 已登录，打开管理面板
           openAdminPanel();
         } else {
-          // 未登录，打开登录窗口
           $('adminLoginModal').classList.remove('hidden');
           $('adminPassword').value = '';
           $('adminPassword').focus();
@@ -665,7 +820,6 @@
         if (e.key === 'Enter') $('doAdminLogin').click(); 
       });
       
-      // 管理面板
       $('closeAdminPanel').addEventListener('click', () => { $('adminPanelModal').classList.add('hidden'); });
       
       $('logoutBtn').addEventListener('click', () => {
@@ -675,7 +829,6 @@
         renderFiles();
       });
       
-      // 标签页切换
       $$('.admin-tab').forEach(tab => {
         tab.addEventListener('click', () => {
           $$('.admin-tab').forEach(t => { t.classList.remove('active', 'text-white', 'border-purple-500'); t.classList.add('text-gray-400', 'border-transparent'); });
@@ -687,7 +840,6 @@
           $('adminConfigTab').classList.toggle('hidden', tabName !== 'config');
           
           if (tabName === 'config') {
-            // 填充当前配置
             $('cfgUrl').value = CONFIG.url;
             $('cfgKey').value = CONFIG.key;
             $('cfgBucket').value = CONFIG.bucket;
@@ -696,7 +848,6 @@
         });
       });
       
-      // 保存配置
       $('saveConfigBtn').addEventListener('click', () => {
         const url = $('cfgUrl').value.trim();
         const key = $('cfgKey').value.trim();
@@ -716,7 +867,7 @@
         loadFiles();
       });
       
-      // 点击事件代理
+      // 点击事件
       document.addEventListener('click', e => {
         const dl = e.target.closest('.dl-btn'), pv = e.target.closest('.pv-btn'), del = e.target.closest('.del-btn'), adminDel = e.target.closest('.admin-del-btn');
         const c = e.target.closest('[data-id]');
@@ -744,7 +895,6 @@
     function openAdminPanel() {
       $('adminPanelModal').classList.remove('hidden');
       renderAdminFileList();
-      // 默认显示文件管理
       $$('.admin-tab').forEach(t => { t.classList.remove('active', 'text-white', 'border-purple-500'); t.classList.add('text-gray-400', 'border-transparent'); });
       const filesTab = document.querySelector('[data-tab="files"]');
       filesTab.classList.add('active', 'text-white', 'border-purple-500');
